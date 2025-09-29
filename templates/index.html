@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Career Prediction</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: #F9FAFB;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .card {
+        border-radius: 15px;
+        padding: 25px;
+        margin: 20px auto;
+        max-width: 800px;
+        background: #fff;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+
+    h1 {
+        text-align: center;
+        color: #3B82F6;
+        font-weight: 700;
+        margin-bottom: 25px;
+    }
+
+    .section-title {
+        margin-top: 20px;
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1.1rem;
+    }
+
+    .scroll-checkbox {
+        max-height: 200px;
+        overflow-y: auto;
+        padding: 10px;
+        border-radius: 10px;
+        background: #F3F4F6;
+        border: 1px solid #E5E7EB;
+        margin-bottom: 10px;
+    }
+
+    .scroll-checkbox label {
+        display: block;
+        margin-bottom: 5px;
+        padding: 5px 8px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .scroll-checkbox input:checked + span {
+        background: #10B981; /* Secondary Green */
+        color: #fff;
+        padding: 3px 8px;
+        border-radius: 5px;
+        font-weight: 500;
+    }
+
+    .scroll-checkbox label:hover {
+        background: #FACC15; /* Accent Yellow */
+        border-radius: 5px;
+    }
+
+    .select-btn {
+        font-size: 0.9rem;
+        cursor: pointer;
+        color: #10B981;
+    }
+
+    button.btn-primary {
+        background-color: #3B82F6;
+        border: none;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    button.btn-primary:hover {
+        background-color: #2563EB;
+        transform: translateY(-2px);
+    }
+
+    .result {
+        margin-top: 20px;
+        font-weight: 700;
+        font-size: 1.3rem;
+        text-align: center;
+        color: #10B981;
+    }
+</style>
+</head>
+<body>
+
+<div class="card">
+    <h1>Career Prediction</h1>
+
+    <!-- Percentages -->
+    <div class="mb-3">
+        <label for="matric" class="form-label">Matric Percentage</label>
+        <input type="number" class="form-control" id="matric" placeholder="Enter Matric %" min="0" max="100">
+    </div>
+    <div class="mb-3">
+        <label for="inter" class="form-label">Intermediate Percentage</label>
+        <input type="number" class="form-control" id="inter" placeholder="Enter Inter %" min="0" max="100">
+    </div>
+
+    <!-- Skills -->
+    <div class="section-title">
+        <span>Skills</span>
+        <div>
+            <span class="select-btn" onclick="selectAll('skill', true)">Select All</span> |
+            <span class="select-btn" onclick="selectAll('skill', false)">Deselect All</span>
+        </div>
+    </div>
+    <div class="scroll-checkbox" id="skills-container"></div>
+    <small id="skills-count" class="text-muted">0 skills selected</small>
+
+    <!-- Interests -->
+    <div class="section-title">
+        <span>Interests</span>
+        <div>
+            <span class="select-btn" onclick="selectAll('interest', true)">Select All</span> |
+            <span class="select-btn" onclick="selectAll('interest', false)">Deselect All</span>
+        </div>
+    </div>
+    <div class="scroll-checkbox" id="interests-container"></div>
+    <small id="interests-count" class="text-muted">0 interests selected</small>
+
+    <button class="btn btn-primary w-100 mt-3" onclick="predictCareer()">Predict Career</button>
+    <div class="result" id="result"></div>
+</div>
+
+<script>
+    const uniqueSkills = ['adobe xd','agile','assembly','c','c#','c++','cisco','css',
+        'data modeling','etl','figma','firebase','firewalls','flutter','github',
+        'html','java','javascript','kotlin','linux','mongodb','node.js','oop',
+        'oracle','pandas','php','prototyping','python','pytorch','r','react',
+        'react native','scikit-learn','security tools','shell scripting','sql',
+        'tensorflow','testing','user research','wireframing','wireshark'];
+
+    const uniqueInterests = ['algorithms','communication','creativity','data analysis',
+        'data gathering','data organization','designing','drawing',
+        'ethical hacking','frontend design','logic','logical thinking',
+        'low-level programming','math','mobile technology','networking',
+        'problem solving','programming','research','security',
+        'structured thinking','system design','system internals','teamwork',
+        'troubleshooting','ui design','user research'];
+
+    // Populate Skills
+    const skillsContainer = document.getElementById("skills-container");
+    uniqueSkills.forEach(skill => {
+        const label = document.createElement("label");
+        label.innerHTML = `<input type="checkbox" class="skill" value="${skill}"> <span>${skill}</span>`;
+        skillsContainer.appendChild(label);
+    });
+
+    // Populate Interests as checkboxes
+    const interestsContainer = document.getElementById("interests-container");
+    uniqueInterests.forEach(interest => {
+        const label = document.createElement("label");
+        label.innerHTML = `<input type="checkbox" class="interest" value="${interest}"> <span>${interest}</span>`;
+        interestsContainer.appendChild(label);
+    });
+
+    function updateCount(type){
+        const count = document.querySelectorAll(`.${type}:checked`).length;
+        document.getElementById(`${type}s-count`).innerText = `${count} ${type}s selected`;
+    }
+
+    document.querySelectorAll('.skill').forEach(cb => cb.addEventListener('change', ()=>updateCount('skill')));
+    document.querySelectorAll('.interest').forEach(cb => cb.addEventListener('change', ()=>updateCount('interest')));
+
+    function selectAll(className, value){
+        document.querySelectorAll(`.${className}`).forEach(cb => cb.checked = value);
+        updateCount(className);
+    }
+
+    function predictCareer(){
+        const matric = parseFloat(document.getElementById("matric").value);
+        const inter = parseFloat(document.getElementById("inter").value);
+        const skills = Array.from(document.querySelectorAll('.skill:checked')).map(cb => cb.value);
+        const interests = Array.from(document.querySelectorAll('.interest:checked')).map(cb => cb.value);
+
+        fetch('/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                "Matric Percentage": matric,
+                "Intermediate Percentage": inter,
+                "Skills": skills,
+                "Interests": interests
+            })
+        })
+        .then(res=>res.json())
+        .then(data=>{
+            document.getElementById("result").innerText = data.predicted_career ? "Predicted Career: " + data.predicted_career : "Error: " + JSON.stringify(data.error);
+        }).catch(err=>{
+            document.getElementById("result").innerText = "Error: " + err;
+        });
+    }
+</script>
+
+</body>
+</html>
