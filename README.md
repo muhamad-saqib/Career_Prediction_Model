@@ -47,7 +47,6 @@ career_prediction/
 
 # Deployment:
 This project can be deployed on:
-- Vercel (for Python/Flask apps)
 - Render
 - Heroku
 
